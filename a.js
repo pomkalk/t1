@@ -121,7 +121,7 @@ class Archive7zo {
 
     static async getBuffer (file, name) { 
         return new Promise((resolve, reject) => {
-            exec(`7z e -sccUTF-8 -so "${file}" "${name}"`, { encoding: 'buffer', maxBuffer: 1024*1024*1024 }, (err, res) => {
+            exec(`7z e -so "${file}" "${name}"`, { encoding: 'buffer', maxBuffer: 1024*1024*1024 }, (err, res) => {
                 if (err) return reject(err)
                 resolve(res)
             })
@@ -243,6 +243,9 @@ const main = async () => {
     let j = './1.json'
     
     let l = await Archive7zo.list(ar)
-   console.log(l)
+    let x = l.find(x=>x.name.indexOf('Wi') >=0 )
+    console.log(x)
+    let b = await Archive7zo.getBuffer(ar, x.path)
+    console.log(b)
 }
 main()
