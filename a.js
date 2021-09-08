@@ -61,7 +61,12 @@ class Archive7zo {
 
     static async list (file) {
         return new Promise((resolve, reject) => {
-            let a = exec(`7z l "${file}"`, (err, res) => {
+            let cmd = `7z l "${file}"`
+            if (process.env.ON_LOCAL) {
+                cmd = `7z l "${file}" | iconv -f cp866 -t utf-8`
+            }
+
+            let a = exec(cmd, (err, res) => {
                 console.log(res)
                 if (err) return reject(err)
                 let match_all = res.match(/^(\d{4}-\d{2}-\d{2})\s(\d{2}:\d{2}:\d{2})\s\.*?([A-Z\.])\.*?\s+?(\d+?)\s+?(\d+?)\s+?(.+?)$/mg)
@@ -120,8 +125,12 @@ class Archive7zo {
     }
 
     static async getBuffer (file, name) { 
+        let cmd = `7z e -so "${file}" "${name}"`
+        if (process.env.ON_LOCAL) {
+            cmd = `echo "${name}" | iconv -f utf-8 -t cp866 | xargs 7z e -sccUTF-8 -so "${file}"`
+        }
         return new Promise((resolve, reject) => {
-            exec(`7z e -so "${file}" "${name}"`, { encoding: 'buffer', maxBuffer: 1024*1024*1024 }, (err, res) => {
+            exec(cmd, { encoding: 'buffer', maxBuffer: 1024*1024*1024 }, (err, res) => {
                 if (err) return reject(err)
                 resolve(res)
             })
