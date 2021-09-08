@@ -61,7 +61,7 @@ class Archive7zo {
 
     static async list (file) {
         return new Promise((resolve, reject) => {
-            let a = exec(`7z l -sccUTF-8 "${file}" | iconv -f cp866 -t utf-8`, (err, res) => {
+            let a = exec(`7z l "${file}"`, (err, res) => {
                 console.log(res)
                 if (err) return reject(err)
                 let match_all = res.match(/^(\d{4}-\d{2}-\d{2})\s(\d{2}:\d{2}:\d{2})\s\.*?([A-Z\.])\.*?\s+?(\d+?)\s+?(\d+?)\s+?(.+?)$/mg)
