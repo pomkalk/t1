@@ -247,5 +247,7 @@ const main = async () => {
     console.log(x)
     let b = await Archive7zo.getBuffer(ar, x.path)
     console.log(b)
+    let c = await Archive7zo.crc64(b)
+    console.log(c)
 }
 main()
