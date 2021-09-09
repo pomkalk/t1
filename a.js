@@ -257,10 +257,7 @@ const main = async () => {
     let ar = './597_mnt2.zip'
     let j = './1.json'
     
-    let a = new AdmZip(ar)
-    let l = a.getEntries()
-    l.forEach(e => {
-        console.log(e.entryName.toString())
-    })
+    let l = await Archive7zo.list(ar)
+    console.log(l)
 }
 main()
