@@ -62,9 +62,9 @@ class Archive7zo {
 
     static async list (file) {
         return new Promise((resolve, reject) => {
-            let cmd = `7z l "${file}"`
+            let cmd = `7z l -scsUTF-8 "${file}"`
             if (process.env.ON_LOCAL) {
-                cmd = `7z l "${file}" | iconv -f cp866 -t utf-8`
+                cmd = `7z l -scsUTF-8 "${file}" | iconv -f cp866 -t utf-8`
             }
 
             let a = exec(cmd, (err, res) => {
