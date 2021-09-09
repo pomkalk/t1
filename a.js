@@ -259,6 +259,9 @@ const main = async () => {
     
     let l = await Archive7zo.list(ar)
     let x = l.find(x=>x.name.indexOf('Wi')>=0)
-    console.log(x)
+    let b = await Archive7zo.getBuffer(ar, x.path)
+    console.log(b)
+    let c = await Archive7zo.crc64(b)
+    console.log(c)
 }
 main()
