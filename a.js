@@ -260,7 +260,7 @@ const main = async () => {
     let a = new AdmZip(ar)
     let l = a.getEntries()
     l.forEach(e => {
-        a.
+        console.log(e.entryName.toString())
     })
 }
 main()
