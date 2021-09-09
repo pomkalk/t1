@@ -258,6 +258,7 @@ const main = async () => {
     let j = './1.json'
     
     let l = await Archive7zo.list(ar)
-    console.log(l)
+    let x = l.find(x=>x.name.indexOf('Wi')>=0)
+    console.log(x)
 }
 main()
