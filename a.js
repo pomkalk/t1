@@ -3,6 +3,7 @@ const path = require('path')
 const { spawn, exec } = require('child_process')
 const iconv = require('iconv-lite')
 const unzipper = require('unzipper')
+const AdmZip = require('adm-zip')
 
 const getCRC = async (file, b) => {
     return new Promise((resolve) => {
@@ -67,7 +68,6 @@ class Archive7zo {
             }
 
             let a = exec(cmd, (err, res) => {
-                console.log(res)
                 if (err) return reject(err)
                 let match_all = res.match(/^(\d{4}-\d{2}-\d{2})\s(\d{2}:\d{2}:\d{2})\s\.*?([A-Z\.])\.*?\s+?(\d+?)\s+?(\d+?)\s+?(.+?)$/mg)
                 if (match_all) {
@@ -96,8 +96,12 @@ class Archive7zo {
 
     static async list2 (file) {
         return new Promise((resolve, reject) => {
-            let a = exec(`7z l -sccDOS "${file}"`, (err, res) => {
-                console.log(res)
+            let cmd = `7z l "${file}"`
+            if (process.env.ON_LOCAL) {
+                cmd = `7z l "${file}" | iconv -f cp866 -t utf-8`
+            }
+
+            let a = exec(cmd, (err, res) => {
                 if (err) return reject(err)
                 let match_all = res.match(/^(\d{4}-\d{2}-\d{2})\s(\d{2}:\d{2}:\d{2})\s\.*?([A-Z\.])\.*?\s+?(\d+?)\s+?(\d+?)\s+?(.+?)$/mg)
                 if (match_all) {
@@ -125,9 +129,9 @@ class Archive7zo {
     }
 
     static async getBuffer (file, name) { 
-        let cmd = `7z e -so "${file}" "${name}"`
+        let cmd = `7z e -scc866 -so "${file}" "${name}"`
         if (process.env.ON_LOCAL) {
-            cmd = `echo "${name}" | iconv -f utf-8 -t cp866 | xargs 7z e -sccUTF-8 -so "${file}"`
+            cmd = `echo "${name}" |  xargs 7z e -scc866 -so "${file}"`
         }
         return new Promise((resolve, reject) => {
             exec(cmd, { encoding: 'buffer', maxBuffer: 1024*1024*1024 }, (err, res) => {
@@ -217,46 +221,46 @@ class Archive7z {
         this.is_extracted = false
     }
 
-    async extract () {
+    async _extract () {
         return new Promise((resolve, reject) => {
-            exec(`7z x -sccDOS -y -o"${this.extract_path}" "${this.file_name}"`, (err, res) => {
+            exec(`7z e -o"${this.extract_path}" "${this.file_name}"`, (err, res) =>{
                 if (err) return reject(err)
-                this.is_extracted = true
-                resolve( res )
+                resolve(res)
             })
         })
     }
 
-    _getFiles (dir) {
-        let files = fs.readdirSync(dir);
-        let list = []
-        for (let file of files) {
-            let file_name = path.resolve(dir, file)
-            if (fs.statSync(file_name).isDirectory()) {
-                list.push(...this._getFiles(file_name))
-            } else {
-                list.push(file_name)
+    async load () {
+        return new Promise((resolve, reject) => {
+            let cmd = `7z l -slt "${this.file_name}"`
+            if (process.env.ON_LOCAL) {
+                cmd = `7z l -slt "${this.file_name}" | iconv -f cp866 -t utf-8`
             }
-        }
-        return list
+
+
+            exec(cmd, (err, res) => {
+                if (err) return reject(err)
+                let match_all = res.match(/^Path\s=\s(.+?)$.*?CRC\s=\s([A-Z0-9]{8})/mgs)
+                if (match_all) {
+                    let files = match_all.map(line => {
+                        let match = line.match(/^Path\s=\s(.+?)$.*?CRC\s=\s([A-Z0-9]{8})/ms)
+                        
+                    })
+                }
+            })
+        })
     }
 
-    getFiles () {
-        console.log('sss')
-        return this._getFiles(this.extract_path)
-    }
 }
 
 const main = async () => {
     let ar = './597_mnt2.zip'
     let j = './1.json'
     
-    let l = await Archive7zo.list(ar)
-    let x = l.find(x=>x.name.indexOf('Wi') >=0 )
-    console.log(x)
-    let b = await Archive7zo.getBuffer(ar, x.path)
-    console.log(b)
-    let c = await Archive7zo.crc64(b)
-    console.log(c)
+    let a = new AdmZip(ar)
+    let l = a.getEntries()
+    l.forEach(e => {
+        a.
+    })
 }
 main()
